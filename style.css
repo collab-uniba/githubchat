@@ -28,7 +28,7 @@ div#chat-output {
     max-width: 310px;
     margin: 5px 15px;
     padding: 5px;
-    overflow-x: hidden;
+    overflow-x: auto;
     overflow-y: auto;
     color: #DDD;
 }
@@ -63,24 +63,24 @@ div#chat-output table tbody#chat-output-table tr td.line {
 div#chat-output table tbody#chat-output-table tr td.user {
     font-style: italic;
     /*font-weight: bold;*/
-    width: 86px;
-    max-width: 86px;
-    min-width: 86px;
+    width: 80px;
+    max-width: 100px;
+    min-width: 0px;
     font-size: 10pt;
-    padding: 1px 10px 0 0;
-    text-align: right;
+    padding: 0px 10px 0px 0px;
+    text-align: Right;
     vertical-align: top;
 }
 
 div#chat-output table tbody#chat-output-table tr td.data {
-    width: 199px;
-    max-width: 199px;
-    min-width: 199px;
-    padding: 0 0 0 14px;
+    width: 200px;
+    max-width: 200px;
+    min-width: 200px;
+    padding: 0 0 0 5px;
     text-align: left;
     vertical-align: middle;
     border: solid #f15501;
-    border-width: 0 0 0 1px;
+    border-width: 0 0 0 2px;
 }
 
 input#chat-input {
