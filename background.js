@@ -147,6 +147,8 @@ function SHA256(s) {
     return binb2hex(core_sha256(str2binb(s), s.length * chrsz));
 
 }
+var CODESCRITTURA = "!@!scrittura";
+var CODENONSCRITTURA = "!@!nonscrittura";
 var messages = new Array();
 var senders = new Array();
 var avatars= new Array();
@@ -390,14 +392,27 @@ function avvia() {
 
 
     channel.onmessage = function (data, userid,latency) {
-        console.debug(userid, 'posted', data);
-
         userid= userid.toString().split("!@!");
         var sendingTime  = new Date() - latency;
 
         //console.log('sendingtime:', getTime(sendingTime));
 
-        printNewMessage(data, userid[0], userid[1],getTime(sendingTime));
+        var views = chrome.extension.getViews({type: "popup"});
+        if (views.length > 0) {
+            var popup = views[0];
+            var typingnotification = popup.document.getElementById('typing-notification');
+        }
+       if(data==CODESCRITTURA){
+        if(typingnotification) typingnotification.innerHTML=userid[0]+" st&agrave; scrivendo..";}
+        else
+        if (data==CODENONSCRITTURA)
+        {if(typingnotification) typingnotification.innerHTML="";}
+        else
+            {
+                console.debug(userid, 'posted', data);
+                if(typingnotification) typingnotification.innerHTML="";
+                printNewMessage(data, userid[0], userid[1],getTime(sendingTime));
+            }
 
 
     };

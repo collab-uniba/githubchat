@@ -36,15 +36,27 @@ if (bgpage.opened) {
 }
 
 chat_input.onkeypress = function (e) {
+    var  msg = this.value;
     if (e.keyCode !== 13 || !this.value) return;
+        //if(msg !="")
+         //   bgpage.channel.send(bgpage.CODESCRITTURA);
+      //  else
+      //      bgpage.channel.send(bgpage.CODENONSCRITTURA);
+   // }else{
 
- var msg = this.value;
+        bgpage.channel.send(msg);
+        bgpage.printNewMessage(msg, 'Me', bgpage.avatar,bgpage.getTime());
+        this.value = '';
+        this.focus();
 
-
-    bgpage.channel.send(msg);
-
-    bgpage.printNewMessage(msg, 'Me', bgpage.avatar,bgpage.getTime());
-
-    this.value = '';
-    this.focus();
 };
+
+chat_input.onkeyup = function (e) {
+    var  msg = this.value;
+    if(msg !="")
+        bgpage.channel.send(bgpage.CODESCRITTURA);
+    else
+        bgpage.channel.send(bgpage.CODENONSCRITTURA);
+
+};
+

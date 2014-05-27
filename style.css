@@ -95,6 +95,15 @@ input#chat-input {
     margin: 10px 15px;
 }
 
+div#typing-notification {
+    height: 25px;
+    width: 310px;
+    max-width: 310px;
+    color: #DDD;
+    margin: 0px 0px 0px auto;
+    font-size: 8pt;
+    padding: 0px 0px 0px 0px;
+}
 input::-webkit-input-placeholder {
     color: #333;
 }
