@@ -147,33 +147,61 @@ function SHA256(s) {
     return binb2hex(core_sha256(str2binb(s), s.length * chrsz));
 
 }
+var CODESCRITTURA = "!@!scrittura";
 var messages = new Array();
 var senders = new Array();
+var avatars= new Array();
 var fired = false;
 var firedTabId = null;
 var nomeCanale = null;
 var channel = null;
+var avatar =null;
 var username = null;
 var opened = false;
+var newmessage;
+var chatusing=true;
+
+var inotification;
+var reset_typing_notification;
 
 
-function appendROW(data, userid) {
-    userid = userid || "&nbsp";
+function appendROW(data, userid,avatar) {
     var views = chrome.extension.getViews({type: "popup"});
-    if (views.length > 0) {
+    if (views.length > 0 && chatusing) {
+
+// si stà visualizzando il popup come chat
+
+        newmessage=false;
         var popup = views[0];
         var chat_output_table = popup.document.getElementById('chat-output-table');
         var chat_output = popup.document.getElementById('chat-output');
+
         if (chat_output_table) {
-            var msg;
-            msg = '<tr><td class="user">' + userid + '</td>';
-            msg += '<td class="data">' + data + '</td></tr>';
+
+
+            var msg ='<div class="chat">';
+            msg += showavatar(avatar);
+            msg += showuser(userid);
+            msg +=  data ;
+            msg +=    '</div>';
 
             chat_output_table.innerHTML = chat_output_table.innerHTML + msg;
             chat_output.scrollTop = chat_output.scrollHeight;
         }
     }
 }
+//restituisce una stringa html con la formattazione per mostrare l'username e l'avatar
+function showuser(userid){
+
+    userid= userid ||"&nbsp";
+    return '<span class="user">' + userid +'</span>';
+}function showavatar(avatar){
+    if (avatar)
+        return '<span class="avatar"><img src=' +"https://avatars.githubusercontent.com/u/"+avatar+"?s=60" + '></span>';
+else return "";
+}
+
+
 
 function appendLINE() {
     var views = chrome.extension.getViews({type: "popup"});
@@ -181,41 +209,57 @@ function appendLINE() {
         var popup = views[0];
         var chat_output_table = popup.document.getElementById('chat-output-table');
         if (chat_output_table) {
-            var msg = '<tr><td colspan="2" class="line"><hr/></td></tr>';
+            var msg = '<div class="line"><hr/></div>';
             chat_output_table.innerHTML = chat_output_table.innerHTML + msg;
             chat_output_table.scrollTop = chat_output_table.scrollHeight;
+
+           /* //salvo messaggio in locale
+            var storage= chrome.storage.local;
+           storage.set({'value':msg}, function() {
+                // Notify that we saved.
+                message('Settings saved');
+            });
+            */
         }
     }
 }
 
-function printNewMessage(data, userid) {
+
+
+
+function printNewMessage(data, userid, avatar, timestamp) {
+    newmessage=true;
+
+    data='<span class="data">'+data+'</span>';
+if(timestamp) data+='<span class="time">'+timestamp+'</span>';
     if (senders.length == 0) {
-        appendROW(data, userid);
+        appendROW(data, userid,avatar);
     } else if (senders.length > 0)
         if (userid == senders[senders.length - 1]) {
             appendROW(data);
         } else {
             appendLINE();
-            appendROW(data, userid);
+            appendROW(data, userid, avatar);
         }
     messages.push(data);
     senders.push(userid);
+    avatars.push(avatar);
 }
 
 function printOldMessage(i) {
     if ((i < 0) || ( i > messages.length - 1)) {
-        alert("Errore di indice");
+            alert(chrome.i18n.getMessage("genericError"));
         return;
     }
 
     if (i == 0)
-        appendROW(messages[i], senders[i]);
+        appendROW(messages[i], senders[i], avatars[i]);
     else {
         if (senders[i] == senders[i - 1])
             appendROW(messages[i]);
         else {
             appendLINE();
-            appendROW(messages[i], senders[i]);
+            appendROW(messages[i], senders[i], avatars[i]);
         }
     }
 }
@@ -226,27 +270,44 @@ function ristampaMessaggi() {
     }
 }
 
+
+
 chrome.tabs.onUpdated.addListener(checkForValidUrl);
 chrome.tabs.onRemoved.addListener(resetBackground);
+
 function resetBackground(tabId, removeInfo) {
     if (fired) {
         if (tabId == firedTabId) {
 //            alert("Logout a causa della chiusura della pagina.");
             firedTabId = null;
             fired = false;
-//            channel.leave(username);
-            opened = false;
             channel = null;
             nomeCanale = null;
-//            username = null;
+            username = null;
+            avatar =null;
             messages = new Array();
             senders = new Array();
+            avatars= new Array();
+            if (opened){
+                channel.leave();
+                opened=false;
+            }
         }
     }
 }
-function checkForValidUrl(tabId, changeInfo, tab) {
-    var matched = tab.url.match(/github.com\/([^\/\s\t\v\n\r\0]+)\/([^\/\s\t\v\n\r\0]+)/i);
 
+
+function checkForValidUrl(tabId, changeInfo, tab) {
+
+    if (changeInfo.status= "complete"){
+
+    var matched = tab.url.match(/github.com\/([^\/\s\t\v\n\r\0]+)\/([^\/\s\t\v\n\r\0]+)/i);
+        //se sono in una pagina di chat visualizzo il popup
+    if (matched != null){
+        chrome.pageAction.show(tabId);
+       // if(matched[1]!=userOwner || matched[2]!= project && fired)
+          //  resetBackground(firedTabId);
+    }
     if ((matched != null) && (!fired)) {
 
         fired = true;
@@ -255,37 +316,95 @@ function checkForValidUrl(tabId, changeInfo, tab) {
         setTimeout(function () {
             chrome.tabs.sendMessage(tabId, {greeting: "hello"}, function (response) {
                 username = response.username;
+                avatar= response.avatar;
             })
         }, 1500);
 
         setTimeout(function () {
             if (username != null) {
                 console.info("Username loggato: " + username);
-                var userOwner = matched[1];
+                var  userOwner = matched[1];
                 var project = matched[2];
                 nomeCanale = SHA256(userOwner + "__" + project);
-
-                chrome.pageAction.show(tabId);
-
                 avvia();
             } else {
-                alert("Errore. Nessun login.");
+                alert(chrome.i18n.getMessage("doLogin"));
+                fired=false;
             }
         }, 3000);
-
+    }
     }
 }
 
+function getTime(currentdate){
+    //var tipologia;
+    if (currentdate){
+        currentdate= new Date(currentdate);
+       // tipologia="Ricevuto alle "
+    }else{
+        currentdate= new Date();
+      //  tipologia="Inviato alle "
+    }
+    var datetime = "["+
+        //tipologia
+        + currentdate.getHours() + ":"
+        + currentdate.getMinutes()
+        //+ ":"+ currentdate.getSeconds()
+       // +" il "
+        //+ currentdate.getDate() + "/"
+      //  + (currentdate.getMonth()+1)  + "/"
+       // + currentdate.getFullYear()
+        +"]";
+    return datetime;
+}
+
 function avvia() {
+
     channel = new DataChannel(nomeCanale);
-    channel.userid = username;
-    channel.onmessage = function (data, userid, latency) {
-        console.debug(userid, 'posted', data);
-        printNewMessage(data, userid);
-        console.log('latency:', latency, 'ms');
+    //console.debug(channel).
+
+    //utilizzo un simbolo !@! per separare username e avatar
+   channel.userid = username+"!@!"+avatar;
+
+
+    channel.onmessage = function (data, userid,latency) {
+        userid= userid.toString().split("!@!");
+        var sendingTime  = new Date() - latency;
+
+        //console.log('sendingtime:', getTime(sendingTime));
+
+        var views = chrome.extension.getViews({type: "popup"});
+        if (views.length > 0) {
+            var popup = views[0];
+            var typingnotification = popup.document.getElementById('typing-notification');
+        }
+       if(data==CODESCRITTURA){
+        if(typingnotification) typingnotification.innerHTML=userid[0]+chrome.i18n.getMessage("iswriting");
+           window.clearTimeout( reset_typing_notification);
+           reset_typing_notification =setTimeout(function(){
+               if (views.length > 0) {
+                   var popup = views[0];
+                   var typingnotification = popup.document.getElementById('typing-notification');
+               }
+               if(typingnotification) typingnotification.innerHTML="";
+           }, 10000);
+
+       }
+        else
+            {
+                console.debug(userid, 'posted', data);
+
+                window.clearTimeout( reset_typing_notification);
+                if(typingnotification) typingnotification.innerHTML="";
+
+                printNewMessage(data, userid[0], userid[1],getTime(sendingTime));
+            }
+
+
     };
     channel.onopen = function () {
         opened = true;
+        channel.send("<i>"+chrome.i18n.getMessage("onopen")+"</i>");
         var views = chrome.extension.getViews({type: "popup"});
         if (views.length > 0) {
             var popup = views[0];
@@ -299,9 +418,33 @@ function avvia() {
 
     /* users presence detection */
     channel.onleave = function (userid) {
-        printNewMessage(userid + ' left!', userid);
+        userid= userid.toString().split("!@!");
+        printNewMessage("<i>"+chrome.i18n.getMessage("onleave")+"</i>", userid[0], userid[1],getTime());
         console.warn(userid + ' left!');
     };
+
+    channel.onclose = function () {
+       console.warn('canale chiuso');
+
+    };
+
+    //Icona lampeggiante
+    inotification=0;
+    window.setInterval(function() {
+        if (fired){
+            inotification++;
+            inotification=inotification%2;
+            if(newmessage){
+                if(inotification==0)
+                    chrome.pageAction.setIcon({path: "images/logo16N.png",tabId:firedTabId});
+                else
+                    chrome.pageAction.setIcon({path: "images/logo16.png", tabId:firedTabId});
+            }
+            else{
+                chrome.pageAction.setIcon({path: "images/logo16.png",tabId:firedTabId});
+            }
+        }
+    }, 500);
 
 // channel.leave( userid ); --- eject a user
 // channel.leave(); --- leave the room yourself!

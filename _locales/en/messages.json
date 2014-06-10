@@ -1,0 +1,19 @@
+{
+
+    /*manifest*/
+    "extDescription":{"message":"For instant messaging in GitHub projects"},
+
+    /*popup*/
+    "me":{"message":"Me"},
+    "genericError":{"message":"Impossible to continue"},
+    "connectedUsers":{"message":"Users Online:"},
+    "noUsers":{"message":"There aren't users in this chatroom"},
+
+
+    /*background*/
+    "onLeave":{"message":"Leaved room"},
+    "iswriting":{"message":" is writing.."},
+    "onopen":{"message":"Connected"},
+    "doLogin":{"message":"Sign-in to use chat"}
+
+}

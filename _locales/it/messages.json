@@ -1,0 +1,19 @@
+{
+
+/*manifest*/
+    "extDescription":{"message":"Per chattare nei progetti di GitHub"},
+
+/*popup*/
+    "me":{"message":"Io"},//Me
+    "genericError":{"message":"Impossibile proseguire"},
+    "connectedUsers":{"message":"Utenti connessi:"},
+    "noUsers":{"message":"Nessun altro utente nella stanza"},
+
+
+/*background*/
+    "onLeave":{"message":"&Egrave; uscito"},
+    "iswriting":{"message":" st&agrave; scrivendo.."},
+    "onopen":{"message":"&Egrave; connesso"},
+    "doLogin":{"message":"Effettuare il login per utilizzare la chat"}
+
+}
