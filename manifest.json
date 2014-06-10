@@ -1,11 +1,11 @@
 {
     "manifest_version": 2,
     "name": "GitHub Chat",
-    "version": "0.0.2.1", //per autoupdate
+    "version": "0.0.2.1",
 
-    //"default_locale": "it",
+    "default_locale": "en",
 
-    "description": "For instant messaging in GitHub projects",
+    "description": "__MSG_extDescription__",
     "icons": {
         "256": "images/logo256.png",
         "128": "images/logo128.png",
@@ -28,8 +28,6 @@
 "page": "background.html"
 },
 
-   // "incognito": "split", //// per test
-
 "content_scripts": [
 {
     "matches": ["*://*/*"],
@@ -43,7 +41,6 @@
 
 "permissions": [
     "tabs",
-    //"unlimitedStorage",
     "http://www.github.com/*",
     "https://github.com/*"
 

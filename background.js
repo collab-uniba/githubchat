@@ -148,7 +148,6 @@ function SHA256(s) {
 
 }
 var CODESCRITTURA = "!@!scrittura";
-var CODENONSCRITTURA = "!@!nonscrittura";
 var messages = new Array();
 var senders = new Array();
 var avatars= new Array();
@@ -163,6 +162,8 @@ var newmessage;
 var chatusing=true;
 
 var inotification;
+var reset_typing_notification;
+
 
 function appendROW(data, userid,avatar) {
     var views = chrome.extension.getViews({type: "popup"});
@@ -176,17 +177,14 @@ function appendROW(data, userid,avatar) {
         var chat_output = popup.document.getElementById('chat-output');
 
         if (chat_output_table) {
-            //compongo il messaggio
-            var msg ='<tr>';
-            msg += '<td>';
-            msg += showuser(userid);
-            msg += '<br>';
-            msg += showavatar(avatar);
-            msg +=     '</td>';
-            msg += '<td class="data">' + data +'</td>';
-            msg +=    '</tr>';
 
-            //chat_output_table.appendChild( popup.document.createTextNode(msg));
+
+            var msg ='<div class="chat">';
+            msg += showavatar(avatar);
+            msg += showuser(userid);
+            msg +=  data ;
+            msg +=    '</div>';
+
             chat_output_table.innerHTML = chat_output_table.innerHTML + msg;
             chat_output.scrollTop = chat_output.scrollHeight;
         }
@@ -194,13 +192,13 @@ function appendROW(data, userid,avatar) {
 }
 //restituisce una stringa html con la formattazione per mostrare l'username e l'avatar
 function showuser(userid){
-    userid = userid || "&nbsp";
-    return '<class="user">' + userid ;
-}
-function showavatar(avatar){
+
+    userid= userid ||"&nbsp";
+    return '<span class="user">' + userid +'</span>';
+}function showavatar(avatar){
     if (avatar)
-        return '<img class="avatar" height="60" width="60" src=' +"https://avatars.githubusercontent.com/u/"+avatar+"?s=60" + '>';
-    else return "";
+        return '<span class="avatar"><img src=' +"https://avatars.githubusercontent.com/u/"+avatar+"?s=60" + '></span>';
+else return "";
 }
 
 
@@ -211,7 +209,7 @@ function appendLINE() {
         var popup = views[0];
         var chat_output_table = popup.document.getElementById('chat-output-table');
         if (chat_output_table) {
-            var msg = '<tr><td colspan="2" class="line"><hr/></td></tr>';
+            var msg = '<div class="line"><hr/></div>';
             chat_output_table.innerHTML = chat_output_table.innerHTML + msg;
             chat_output_table.scrollTop = chat_output_table.scrollHeight;
 
@@ -231,7 +229,9 @@ function appendLINE() {
 
 function printNewMessage(data, userid, avatar, timestamp) {
     newmessage=true;
-if(timestamp) data="<p>"+data+"<h6>"+timestamp+"</h6></p>";
+
+    data='<span class="data">'+data+'</span>';
+if(timestamp) data+='<span class="time">'+timestamp+'</span>';
     if (senders.length == 0) {
         appendROW(data, userid,avatar);
     } else if (senders.length > 0)
@@ -248,7 +248,7 @@ if(timestamp) data="<p>"+data+"<h6>"+timestamp+"</h6></p>";
 
 function printOldMessage(i) {
     if ((i < 0) || ( i > messages.length - 1)) {
-        alert("Errore di indice");
+            alert(chrome.i18n.getMessage("genericError"));
         return;
     }
 
@@ -281,10 +281,6 @@ function resetBackground(tabId, removeInfo) {
 //            alert("Logout a causa della chiusura della pagina.");
             firedTabId = null;
             fired = false;
-            if (opened){
-                channel.leave();
-                opened=false;
-            }
             channel = null;
             nomeCanale = null;
             username = null;
@@ -292,8 +288,10 @@ function resetBackground(tabId, removeInfo) {
             messages = new Array();
             senders = new Array();
             avatars= new Array();
-
-
+            if (opened){
+                channel.leave();
+                opened=false;
+            }
         }
     }
 }
@@ -302,6 +300,7 @@ function resetBackground(tabId, removeInfo) {
 function checkForValidUrl(tabId, changeInfo, tab) {
 
     if (changeInfo.status= "complete"){
+
     var matched = tab.url.match(/github.com\/([^\/\s\t\v\n\r\0]+)\/([^\/\s\t\v\n\r\0]+)/i);
         //se sono in una pagina di chat visualizzo il popup
     if (matched != null){
@@ -327,47 +326,24 @@ function checkForValidUrl(tabId, changeInfo, tab) {
                 var  userOwner = matched[1];
                 var project = matched[2];
                 nomeCanale = SHA256(userOwner + "__" + project);
-
-             // chrome.pageAction.show(tabId);
-
                 avvia();
             } else {
-                alert("Errore. Nessun login. Provare a riaggiornare la pagina");
+                alert(chrome.i18n.getMessage("doLogin"));
                 fired=false;
             }
         }, 3000);
-
-//Icona lampeggiante
-        inotification=0;
-        window.setInterval(function() {
-            if (fired){
-                inotification++;
-                inotification=inotification%2;
-                if(newmessage){
-                    if(inotification==0)
-                        chrome.pageAction.setIcon({path: "images/logo16N.png",tabId:firedTabId});
-                    else
-                        chrome.pageAction.setIcon({path: "images/logo16.png", tabId:firedTabId});
-                }
-                else{
-                    chrome.pageAction.setIcon({path: "images/logo16.png",tabId:firedTabId});
-                }
-            }
-        }, 500);
-
-
     }
     }
 }
 
 function getTime(currentdate){
-    var tipologia;
+    //var tipologia;
     if (currentdate){
         currentdate= new Date(currentdate);
-        tipologia="Ricevuto alle "
+       // tipologia="Ricevuto alle "
     }else{
         currentdate= new Date();
-        tipologia="Inviato alle "
+      //  tipologia="Inviato alle "
     }
     var datetime = "["+
         //tipologia
@@ -403,14 +379,24 @@ function avvia() {
             var typingnotification = popup.document.getElementById('typing-notification');
         }
        if(data==CODESCRITTURA){
-        if(typingnotification) typingnotification.innerHTML=userid[0]+" st&agrave; scrivendo..";}
-        else
-        if (data==CODENONSCRITTURA)
-        {if(typingnotification) typingnotification.innerHTML="";}
+        if(typingnotification) typingnotification.innerHTML=userid[0]+chrome.i18n.getMessage("iswriting");
+           window.clearTimeout( reset_typing_notification);
+           reset_typing_notification =setTimeout(function(){
+               if (views.length > 0) {
+                   var popup = views[0];
+                   var typingnotification = popup.document.getElementById('typing-notification');
+               }
+               if(typingnotification) typingnotification.innerHTML="";
+           }, 10000);
+
+       }
         else
             {
                 console.debug(userid, 'posted', data);
+
+                window.clearTimeout( reset_typing_notification);
                 if(typingnotification) typingnotification.innerHTML="";
+
                 printNewMessage(data, userid[0], userid[1],getTime(sendingTime));
             }
 
@@ -418,7 +404,7 @@ function avvia() {
     };
     channel.onopen = function () {
         opened = true;
-        channel.send("&Egrave; connesso");
+        channel.send("<i>"+chrome.i18n.getMessage("onopen")+"</i>");
         var views = chrome.extension.getViews({type: "popup"});
         if (views.length > 0) {
             var popup = views[0];
@@ -433,7 +419,7 @@ function avvia() {
     /* users presence detection */
     channel.onleave = function (userid) {
         userid= userid.toString().split("!@!");
-        printNewMessage("&Egrave; uscito", userid[0], userid[1],getTime());
+        printNewMessage("<i>"+chrome.i18n.getMessage("onleave")+"</i>", userid[0], userid[1],getTime());
         console.warn(userid + ' left!');
     };
 
@@ -441,6 +427,24 @@ function avvia() {
        console.warn('canale chiuso');
 
     };
+
+    //Icona lampeggiante
+    inotification=0;
+    window.setInterval(function() {
+        if (fired){
+            inotification++;
+            inotification=inotification%2;
+            if(newmessage){
+                if(inotification==0)
+                    chrome.pageAction.setIcon({path: "images/logo16N.png",tabId:firedTabId});
+                else
+                    chrome.pageAction.setIcon({path: "images/logo16.png", tabId:firedTabId});
+            }
+            else{
+                chrome.pageAction.setIcon({path: "images/logo16.png",tabId:firedTabId});
+            }
+        }
+    }, 500);
 
 // channel.leave( userid ); --- eject a user
 // channel.leave(); --- leave the room yourself!

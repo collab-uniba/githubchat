@@ -1,14 +1,16 @@
 body {
     min-width: 350px;
-    width: 350px;
     max-width: 350px;
+    min-height: 550px;
+    max-height: 550px;
+    width: 350px;
     height: 550px;
     background: #333;
-    padding: 0;
-    margin: 0;
+// padding: 0;
+// margin: 0;
     font-family: Verdana, sans-serif;
     font-size: 11pt;
-    line-height: 170%;
+    line-height: 100%;
     color: #DDD;
     overflow: hidden;
 }
@@ -22,77 +24,98 @@ div#title {
     color: #f15501;
 }
 
+
+div#button-bar{
+    text-align: right;
+}
+
+
+div#button-bar .button{
+    height: 23px;
+    width: 23px;
+    max-width: 23px;
+    max-height: 23px;
+}
+
+.chat{
+//min-height:24px;
+    padding:8px 6px 4px 37px;
+    position:relative;
+// margin: 0 2px 0px 0;
+}
+
+.chat:last-child{
+    margin-bottom:0;
+}
+
+.chat span{
+    color:#EBEBEB;
+    font-size:12px;
+}
+
+.chat .data{
+    word-wrap: break-word;
+    margin-left: 6px;
+    /* display:inline-block; */
+    /* font-size:15px; */
+    /* overflow:hidden; */
+    /* vertical-align:top; */
+    /* width:190px; */
+}
+
+.chat .avatar{
+    left:7px;
+    position:absolute;
+    top:7px;
+}
+
+.chat img{
+    display:block;
+    height: 23px;
+    width: 23px;
+}
+
+.chat .time{
+    position:absolute;
+    right:4px;
+    bottom:2px;
+    font-size:8px;
+}
+
+.chat .user{
+    margin-right:6px;
+    text-shadow:1px 1px #aaaaaa;
+}
+
 div#chat-output {
-    height: 440px;
-    width: 310px;
-    max-width: 310px;
-    margin: 5px 15px;
-    padding: 5px;
-    overflow-x: auto;
+    height: 430px;
+//   width: 310px;
+//  max-width: 310px;
+// margin: 5px 15px;
+// padding: 5px;
+    overflow-x: hidden;
     overflow-y: auto;
-    color: #DDD;
 }
-
-div#chat-output table {
-    width: 100%;
-    max-width: 100%;
-    min-width: 100%;
-    border: 0;
-    padding: 0;
-    margin: 0;
-    border-spacing: 0;
-}
-
-div#chat-output table tbody#chat-output-table {
-    width: 100%;
-    max-width: 100%;
-    min-width: 100%;
-}
-
-div#chat-output table tbody#chat-output-table tr {
-    width: 100%;
-    max-width: 100%;
-    min-width: 100%;
-}
-
-div#chat-output table tbody#chat-output-table tr td.line {
+div#chat-output .message {
+    margin: 5px auto 0;
+    height: 30px;
+    font-size: 12pt;
     text-align: center;
     vertical-align: middle;
 }
 
-div#chat-output table tbody#chat-output-table tr td.user {
-    font-style: italic;
-    /*font-weight: bold;*/
-    width: 80px;
-    max-width: 100px;
-    min-width: 0px;
-    font-size: 10pt;
-    padding: 0px 10px 0px 0px;
-    text-align: Right;
-    vertical-align: top;
-}
-
-div#chat-output table tbody#chat-output-table tr td.data {
-    width: 200px;
-    max-width: 200px;
-    min-width: 200px;
-    padding: 0 0 0 5px;
-    text-align: left;
-    vertical-align: middle;
-    border: solid #f15501;
-    border-width: 0 0 0 2px;
-}
-
 input#chat-input {
-    padding: 5px 10px;
+    padding: 2px 10px 2px 10px;
     vertical-align: middle;
-    width: 300px;
+    width: 330px;
     height: 28px;
-    font-size: 14pt;
-    background: #222;
+    font-size: 12pt;
+    background: #cdcdcd;
     border: 0 solid #888;
-    color: #CCC;
-    margin: 10px 15px;
+    color: #181818;
+//margin: 10px 15px;
+    position:absolute;
+    top:520px;
 }
 
 div#typing-notification {
@@ -100,9 +123,11 @@ div#typing-notification {
     width: 310px;
     max-width: 310px;
     color: #DDD;
-    margin: 0px 0px 0px auto;
+// margin: 0px 0px 0px auto;
     font-size: 8pt;
-    padding: 0px 0px 0px 0px;
+// padding: 0px 0px 0px 0px;
+    position:absolute;
+    top:500px;
 }
 input::-webkit-input-placeholder {
     color: #333;
@@ -113,7 +138,7 @@ input::-webkit-input-placeholder {
 }
 
 hr {
-    margin: 18px auto;
+    /* margin: 18px auto; */
     width: 100%;
     border: 0 solid #f15501;
     /*border-top-width: 1px;*/
